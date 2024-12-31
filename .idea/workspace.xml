@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="02f160a5-2409-45ad-9ca3-329beeee86a9" name="変更" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/machine-learning.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_processing.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/a2c/no1.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/a2c/no2.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/a2c/no3.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/d3qn/no1.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/ddqn/no1.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/dqn/no1.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/ppo/no1.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/drl/reinforce/no1.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowdata/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowdata/setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowdata/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowdata/src/flow_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowenv/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowenv/setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowenv/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowenv/src/const.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowenv/src/flow_test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flowenv/src/flow_train.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.ipynb" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="Jupyter Notebook" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2qvVBBevXA8Oqu4LzL6nXLlrql4" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/takat/PycharmProjects/machine-learning/drl/ddqn",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.intellij.jupyter.core.jupyter.connections.configuration.JupyterServerConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\takat\PycharmProjects\machine-learning\drl\ddqn" />
+      <recent name="C:\Users\takat\PycharmProjects\machine-learning" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\takat\PycharmProjects\machine-learning\flowdata\src" />
+      <recent name="C:\Users\takat\PycharmProjects\machine-learning\flowdata" />
+      <recent name="C:\Users\takat\PycharmProjects\machine-learning\flowenv\src" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-PY-243.22562.220" />
+        <option value="bundled-python-sdk-0fc6c617c4bd-9a18a617cbe4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.22562.220" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="アプリケーションレベル" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="デフォルトタスク">
+      <changelist id="02f160a5-2409-45ad-9ca3-329beeee86a9" name="変更" comment="" />
+      <created>1735542899049</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1735542899049</updated>
+      <workItem from="1735542900076" duration="91000" />
+      <workItem from="1735542994630" duration="112000" />
+      <workItem from="1735543205300" duration="2207000" />
+      <workItem from="1735545439595" duration="17504000" />
+      <workItem from="1735608382284" duration="13825000" />
+      <workItem from="1735623856800" duration="15063000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
