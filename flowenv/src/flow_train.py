@@ -49,18 +49,33 @@ class FlowTrainEnv(gym.Env):
         self.state = self.data[CONST.features_labels].iloc[self.index].values
         answer = self.data[CONST.reference_label].iloc[self.index]
 
-        self.index += 1
-        reward = 1 if action == answer else -1
-        confusion = ("TP" if action == 1 else "TN") if action == answer else ("FP" if action == 1 else "FN")
+        self.index = random.randint(0, self.state_len - 1)
+
+        if action == answer:
+            reward = 1
+            if action == 1:
+                confusion = "TP"
+                confusion_value = 0
+            else:
+                confusion = "TN"
+                confusion_value = 1
+        else:
+            reward = -1
+            if action == 1:
+                confusion = "FP"
+                confusion_value = 2
+            else:
+                confusion = "FN"
+                confusion_value = 3
 
         try:
             observation = self.data[CONST.features_labels].iloc[self.index].values
         except IndexError:
             self.index = 0
             observation = self.data[CONST.features_labels].iloc[self.index].values
-        info = { "confusion": confusion }
+        info = {"confusion": confusion, "value": confusion_value}
 
-        terminated = self.index % 100 == 0
+        terminated = random.random() < 0.05
         return observation, reward, terminated, False, info
 
     def render(self, mode=None):
