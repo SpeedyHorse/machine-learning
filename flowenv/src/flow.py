@@ -53,11 +53,38 @@ class FlowEnv(gym.Env):
 
         reward = 1 if action == answer else -1
         # (row, column)
-        matrix_position = (
-            0 if action == answer else 1,
-            0 if answer == 1 else 1
-        )
-        info = matrix_position
+        """
+        0, 0: TP : action == answer == 1
+        0, 1: FN : action == 0, answer == 1
+        1, 0: FP : action == 1, answer == 0
+        1, 1: TN : action == answer == 0
+        
+        if action == answer:
+            # (0, 0) or (1, 1)
+            if action == 1:
+                matrix_position = (0, 0)
+            else:
+                matrix_position = (1, 1)
+        else:
+            # (0, 1) or (1, 0)
+            if action == 1:
+                matrix_position = (1, 0)
+            else:
+                matrix_position = (0, 1)
+        """
+        if action == answer:
+            # (0, 0) or (1, 1)
+            if action == 1:
+                matrix_position = (0, 0)
+            else:
+                matrix_position = (1, 1)
+        else:
+            # (0, 1) or (1, 0)
+            if action == 1:
+                matrix_position = (1, 0)
+            else:
+                matrix_position = (0, 1)
+        info = {"confusion_position": matrix_position}
 
         try:
             observation = self.data[CONST.features_labels].iloc[self.index].values
