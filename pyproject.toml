@@ -20,6 +20,6 @@ dependencies = [
 members = ["flowenv", "flowdata"]
 
 [tool.uv.sources]
-flowdata = { workspace = true }
 flowenv = { workspace = true }
+flowdata = { workspace = true }
 
