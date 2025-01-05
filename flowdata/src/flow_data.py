@@ -28,4 +28,7 @@ def using_data():
         train_data[label] = min_max_p(train_data[label])
         test_data[label] = min_max_p(test_data[label])
 
+    train_data.dropna(how="any")
+    test_data.dropna(how="any")
+
     return train_data, test_data
