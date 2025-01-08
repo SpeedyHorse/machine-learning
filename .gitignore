@@ -164,4 +164,4 @@ cython_debug/
 
 DNP3_Intrusion_Detection_Dataset_Final
 *pycharm-support-libs*
-.idea
+.idea/*
