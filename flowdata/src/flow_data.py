@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 from flowenv.src.const import Const
 from pathlib import Path
+from imblearn.over_sampling import SMOTENC
 
 
 def min_max_p(p):
     min_p = p.min()
     max_p = p.max()
     return (p - min_p) / (max_p - min_p)
+
 
 CONST = Const()
 
@@ -16,6 +18,7 @@ TEST_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_
 
 TRAIN_DATA_PATH = Path(__file__).resolve().parent.joinpath(TRAIN_DATA_PATH)
 TEST_DATA_PATH = Path(__file__).resolve().parent.joinpath(TEST_DATA_PATH)
+
 
 def using_data():
     train_data = pd.read_csv(TRAIN_DATA_PATH).replace([np.inf, -np.inf], np.nan).dropna(how="all").dropna(how="all", axis=1)
@@ -31,4 +34,21 @@ def using_data():
     train_data = train_data.dropna(how="any")
     test_data = test_data.dropna(how="any")
 
-    return train_data, test_data
+    categorycal_features = ["Dst Port", "Protocol"]
+
+    smote = SMOTENC(
+        categorical_features=[train_data.columns.get_loc(label) for label in categorycal_features], 
+        random_state=42
+    )
+
+    X_train = train_data.drop(columns=["Binary Label"])
+    y_train = train_data["Binary Label"]
+
+    X_train, y_train = smote.fit_resample(X_train, y_train)
+
+    X_resampled = pd.DataFrame(X_train, columns=CONST.features_labels)
+    y_resampled = pd.Series(y_train, name="Binary Label")
+
+    resampled_train_data = pd.concat([X_resampled, y_resampled], axis=1)
+
+    return resampled_train_data, test_data

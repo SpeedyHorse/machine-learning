@@ -8,6 +8,7 @@ dependencies = [
     "flowdata",
     "flowenv",
     "gymnasium>=1.0.0",
+    "imbalanced-learn>=0.13.0",
     "ipykernel>=6.29.5",
     "matplotlib>=3.10.0",
     "numpy>=2.2.1",

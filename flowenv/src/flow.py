@@ -10,9 +10,11 @@ from flowenv.src.const import Const
 
 CONST = Const()
 
+
 class Actions(Enum):
     right = 1
     wrong = -1
+
 
 class FlowEnv(gym.Env):
     def __init__(self, render_mode=None, data=None):
