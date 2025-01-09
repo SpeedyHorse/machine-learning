@@ -31,9 +31,10 @@ class FlowEnv(gym.Env):
         self.state = {}
         self.done = False
         self.reward = 0.0
-        self.index = 0
-        self.pull = []
+        self.rng = np.random.default_rng(0)
         self.state_len = len(self.data)
+        self.index_array = np.arange(0, self.state_len - 1)
+        self.index = 0
         self.terminate = random.random() < 0.05
 
     def reset(self, seed=None, options=None):
@@ -41,17 +42,22 @@ class FlowEnv(gym.Env):
 
         self.state = self.data[CONST.features_labels].iloc[0].values
         self.state_len = len(self.state)
-        self.pull = []
+        self.index_array = np.arange(0, self.state_len - 1)
+        self.index = self.rng.choice(self.index_array, 1)[0]
+
+        np.delete(self.index_array, self.index)
+        self.state = self.data[CONST.features_labels].iloc[self.index].values
         # self.terminate
         info = { "state": self.state }
 
         return self.state, info
 
     def step(self, action):
-        self.state = self.data[CONST.features_labels].iloc[self.index].values
+        # self.state = self.data[CONST.features_labels].iloc[num].values
         answer = self.data[CONST.reference_label].iloc[self.index]
 
-        self.index += 1
+        self.index = self.rng.choice(self.index_array, 1)[0]
+        np.delete(self.index_array, self.index)
 
         reward = 1 if action == answer else -1
         # (row, column)
@@ -94,7 +100,7 @@ class FlowEnv(gym.Env):
             self.index = 0
             observation = self.data[CONST.features_labels].iloc[self.index].values
 
-        terminated = self.index % 100 == 0
+        terminated = random.random() < 0.05
         return observation, reward, terminated, False, info
 
     def render(self, mode=None):

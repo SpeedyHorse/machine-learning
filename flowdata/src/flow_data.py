@@ -34,6 +34,8 @@ def using_data():
     train_data = train_data.dropna(how="any")
     test_data = test_data.dropna(how="any")
 
+    train_data = train_data.filter(items=CONST.features_labels + ["Binary Label"])
+
     categorycal_features = ["Dst Port", "Protocol"]
 
     smote = SMOTENC(
@@ -41,8 +43,8 @@ def using_data():
         random_state=42
     )
 
-    X_train = train_data.drop(columns=["Binary Label"])
     y_train = train_data["Binary Label"]
+    X_train = train_data.drop(columns=["Binary Label"])
 
     X_train, y_train = smote.fit_resample(X_train, y_train)
 
