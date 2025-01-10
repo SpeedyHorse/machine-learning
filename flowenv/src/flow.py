@@ -92,7 +92,11 @@ class FlowEnv(gym.Env):
                 matrix_position = (1, 0)
             else:
                 matrix_position = (0, 1)
-        info = {"confusion_position": matrix_position}
+        info = {
+            "confusion_position": matrix_position,
+            "action": action,
+            "answer": answer,
+        }
 
         try:
             observation = self.data[CONST.features_labels].iloc[self.index].values
