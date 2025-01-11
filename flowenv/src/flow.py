@@ -97,6 +97,7 @@ class FlowEnv(gym.Env):
                 matrix_position = (1, 0)
             else:
                 matrix_position = (0, 1)
+        # matrix_position = (action, answer)
         info = {
             "confusion_position": matrix_position,
             "action": action,
