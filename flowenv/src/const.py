@@ -142,7 +142,13 @@ class Const(object):
         "Idle Max",
         "Idle Min",
     ]
-
+    __attack_labels = [
+        "ARP_POISONING",
+        "MITM_DOS",
+        "REPLAY",
+        "DNP3_ENUMERATE",
+    ]
+    
     @property
     def reference_label(self):
         return self.__reference_label
@@ -154,3 +160,7 @@ class Const(object):
     @property
     def normalization_features(self):
         return self.__normalization_features
+    
+    @property
+    def attack_labels(self):
+        return self.__attack_labels

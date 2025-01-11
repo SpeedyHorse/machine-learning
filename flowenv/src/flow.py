@@ -32,8 +32,8 @@ class FlowEnv(gym.Env):
         self.done = False
         self.reward = 0.0
         self.rng = np.random.default_rng(0)
-        self.state_len = len(self.data)
-        self.index_array = np.arange(0, self.state_len - 1)
+        self.data_len = len(self.data)
+        self.index_array = np.arange(0, self.data_len - 1)
         self.index = 0
         self.terminate = random.random() < 0.05
 
@@ -41,14 +41,14 @@ class FlowEnv(gym.Env):
         super().reset(seed=seed)
 
         self.state = self.data[CONST.features_labels].iloc[0].values
-        self.state_len = len(self.state)
-        self.index_array = np.arange(0, self.state_len - 1)
+        self.data_len = len(self.data)
+        self.index_array = np.arange(0, self.data_len - 1)
         self.index = self.rng.choice(self.index_array, 1)[0]
 
         np.delete(self.index_array, self.index)
         self.state = self.data[CONST.features_labels].iloc[self.index].values
         # self.terminate
-        info = { "state": self.state }
+        info = { "state": self.state, "row": len(self.data), "column": len(self.data.columns) }
 
         return self.state, info
 
@@ -62,7 +62,7 @@ class FlowEnv(gym.Env):
             next_answer = self.data[CONST.reference_label].iloc[self.index]
             if want_to_answer == next_answer:
                 break
-        np.delete(self.index_array, self.index)
+        self.index_array = np.delete(self.index_array, np.where(self.index_array == self.index))
 
         reward = 1 if action == answer else -1
         # (row, column)
@@ -108,8 +108,9 @@ class FlowEnv(gym.Env):
         except IndexError:
             self.index = 0
             observation = self.data[CONST.features_labels].iloc[self.index].values
+        # print(self.data_len, len(self.index_array), self.data_len - len(self.index_array))
 
-        terminated = random.random() < 0.05
+        terminated = random.random() < 0.05 and self.data_len - len(self.index_array) >= 100
         return observation, reward, terminated, False, info
 
     def render(self, mode=None):

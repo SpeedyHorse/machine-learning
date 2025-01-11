@@ -12,6 +12,7 @@ def min_max_p(p):
 
 
 CONST = Const()
+ATTACK_LABELS = CONST.attack_labels
 
 TRAIN_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_Balanced_CSV_Files/CICFlowMeter/CICFlowMeter_Training_Balanced.csv"
 TEST_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_Balanced_CSV_Files/CICFlowMeter/CICFlowMeter_Testing_Balanced.csv"
@@ -24,8 +25,8 @@ def using_data():
     train_data = pd.read_csv(TRAIN_DATA_PATH).replace([np.inf, -np.inf], np.nan).dropna(how="all").dropna(how="all", axis=1)
     test_data = pd.read_csv(TEST_DATA_PATH).dropna(how="all").replace([np.inf, -np.inf], np.nan).dropna(how="all", axis=1)
 
-    train_data["Binary Label"] = train_data["Label"] == "NORMAL"
-    test_data["Binary Label"] = test_data["Label"] == "NORMAL"
+    train_data["Binary Label"] = train_data["Label"].apply(lambda label: label in ATTACK_LABELS)
+    test_data["Binary Label"] = test_data["Label"].apply(lambda label: label in ATTACK_LABELS)
 
     for label in CONST.normalization_features:
         train_data[label] = min_max_p(train_data[label])
