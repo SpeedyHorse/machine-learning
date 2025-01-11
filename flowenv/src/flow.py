@@ -56,7 +56,12 @@ class FlowEnv(gym.Env):
         # self.state = self.data[CONST.features_labels].iloc[num].values
         answer = self.data[CONST.reference_label].iloc[self.index]
 
-        self.index = self.rng.choice(self.index_array, 1)[0]
+        while True:
+            want_to_answer = random.random() < 0.7
+            self.index = self.rng.choice(self.index_array, 1)[0]
+            next_answer = self.data[CONST.reference_label].iloc[self.index]
+            if want_to_answer == next_answer:
+                break
         np.delete(self.index_array, self.index)
 
         reward = 1 if action == answer else -1
