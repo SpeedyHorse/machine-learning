@@ -56,13 +56,14 @@ class FlowEnv(gym.Env):
         # self.state = self.data[CONST.features_labels].iloc[num].values
         answer = self.data[CONST.reference_label].iloc[self.index]
 
-        while True:
-            want_to_answer = random.random() < 0.7
-            self.index = self.rng.choice(self.index_array, 1)[0]
-            next_answer = self.data[CONST.reference_label].iloc[self.index]
-            if want_to_answer == next_answer:
-                break
-        self.index_array = np.delete(self.index_array, np.where(self.index_array == self.index))
+        # while True:
+        #    want_to_answer = random.random() < 0.7
+        #    self.index = self.rng.choice(self.index_array, 1)[0]
+        #    next_answer = self.data[CONST.reference_label].iloc[self.index]
+        #    if want_to_answer == next_answer:
+        #        break
+        self.index = self.rng.choice(self.index_array, 1)[0]
+        # self.index_array = np.delete(self.index_array, np.where(self.index_array == self.index))
 
         reward = 1 if action == answer else -1
         # (row, column)
@@ -111,7 +112,8 @@ class FlowEnv(gym.Env):
             observation = self.data[CONST.features_labels].iloc[self.index].values
         # print(self.data_len, len(self.index_array), self.data_len - len(self.index_array))
 
-        terminated = random.random() < 0.05 and self.data_len - len(self.index_array) >= 100
+        # terminated = random.random() < 0.05 and self.data_len - len(self.index_array) >= 100
+        terminated = random.random() < 0.01
         return observation, reward, terminated, False, info
 
     def render(self, mode=None):
