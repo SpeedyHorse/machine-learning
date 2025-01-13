@@ -40,7 +40,6 @@ class FlowEnv(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        self.state = self.data[CONST.features_labels].iloc[0].values
         self.data_len = len(self.data)
         self.index_array = np.arange(0, self.data_len - 1)
         self.index = self.rng.choice(self.index_array, 1)[0]
