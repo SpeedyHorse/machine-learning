@@ -21,18 +21,21 @@ class FlowEnv(gym.Env):
         super(FlowEnv, self).__init__()
 
         self.render_mode = render_mode
-        self.data = [] if data is None else data
+        if data is not None:
+            self.features = data.drop(columns=["Binary Label"])
+            self.labels = data["Binary Label"]
+        # self.data = [] if data is None else data
 
         self.action_space = spaces.Discrete(len(Actions))
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(len(CONST.features_labels),), dtype=np.float64
+            low=-np.inf, high=np.inf, shape=(len(self.features.columns),), dtype=np.float64
         )
 
         self.state = {}
         self.done = False
         self.reward = 0.0
         self.rng = np.random.default_rng(0)
-        self.data_len = len(self.data)
+        self.data_len = len(self.features)
         self.index_array = np.arange(0, self.data_len - 1)
         self.index = 0
         self.terminate = random.random() < 0.05
@@ -40,32 +43,24 @@ class FlowEnv(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
-        self.data_len = len(self.data)
+        self.data_len = len(self.features)
         self.index_array = np.arange(0, self.data_len - 1)
         self.index = self.rng.choice(self.index_array, 1)[0]
 
         np.delete(self.index_array, self.index)
-        self.state = self.data[CONST.features_labels].iloc[self.index].values
+        self.state = self.features.iloc[self.index].values
         # self.terminate
-        info = { "state": self.state, "row": len(self.data), "column": len(self.data.columns) }
+        info = { "state": self.state, "row": len(self.features), "column": len(self.features.columns) }
 
         return self.state, info
 
     def step(self, action):
-        # self.state = self.data[CONST.features_labels].iloc[num].values
-        answer = self.data[CONST.reference_label].iloc[self.index]
+        answer = self.labels.iloc[self.index]
 
-        # while True:
-        #    want_to_answer = random.random() < 0.7
-        #    self.index = self.rng.choice(self.index_array, 1)[0]
-        #    next_answer = self.data[CONST.reference_label].iloc[self.index]
-        #    if want_to_answer == next_answer:
-        #        break
         self.index = self.rng.choice(self.index_array, 1)[0]
-        # self.index_array = np.delete(self.index_array, np.where(self.index_array == self.index))
 
         reward = 1 if action == answer else -1
-        # (row, column)
+
         """
         0, 0: TP : action == answer == 1
         0, 1: FN : action == 0, answer == 1
@@ -105,10 +100,10 @@ class FlowEnv(gym.Env):
         }
 
         try:
-            observation = self.data[CONST.features_labels].iloc[self.index].values
+            observation = self.features.iloc[self.index].values
         except IndexError:
             self.index = 0
-            observation = self.data[CONST.features_labels].iloc[self.index].values
+            observation = self.features.iloc[self.index].values
         # print(self.data_len, len(self.index_array), self.data_len - len(self.index_array))
 
         # terminated = random.random() < 0.05 and self.data_len - len(self.index_array) >= 100

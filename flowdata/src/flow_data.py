@@ -43,19 +43,27 @@ def _read_data(binarize=False, balance=False):
     train_data = train_data.filter(items=CONST.features_labels + [targets])
     test_data = test_data.filter(items=CONST.features_labels + [targets])
 
+    conbine_data = pd.concat([train_data, test_data], ignore_index=True)
     ohe = OneHotEncoder(sparse_output=False)
-    train_data_ohe = ohe.fit_transform(train_data[CATEGORICAL_FEATURES])
-    train_data_ohe = pd.DataFrame(train_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
-    train_data = pd.concat([train_data.drop(columns=CATEGORICAL_FEATURES), train_data_ohe], axis=1)
+    conbine_data_ohe = ohe.fit_transform(conbine_data[CATEGORICAL_FEATURES])
+    conbine_data_ohe = pd.DataFrame(conbine_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
+    conbine_data = pd.concat([conbine_data.drop(columns=CATEGORICAL_FEATURES), conbine_data_ohe], axis=1)
+
+    train_data = conbine_data.iloc[:len(train_data) - 1]
+    test_data = conbine_data.iloc[len(train_data):]
+
+    # train_data_ohe = ohe.fit_transform(train_data[CATEGORICAL_FEATURES])
+    # train_data_ohe = pd.DataFrame(train_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
+    # train_data = pd.concat([train_data.drop(columns=CATEGORICAL_FEATURES), train_data_ohe], axis=1)
     train_smotenc_columns = ohe.get_feature_names_out(CATEGORICAL_FEATURES).tolist()
 
-    test_data_ohe = ohe.fit_transform(test_data[CATEGORICAL_FEATURES])
-    test_data_ohe = pd.DataFrame(test_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
-    test_data = pd.concat([test_data.drop(columns=CATEGORICAL_FEATURES), test_data_ohe], axis=1)
+    # test_data_ohe = ohe.fit_transform(test_data[CATEGORICAL_FEATURES])
+    # test_data_ohe = pd.DataFrame(test_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
+    # test_data = pd.concat([test_data.drop(columns=CATEGORICAL_FEATURES), test_data_ohe], axis=1)
 
     for label in CONST.normalization_features:
-        train_data[label] = min_max_p(train_data[label])
-        test_data[label] = min_max_p(test_data[label])
+        train_data.loc[:, label] = min_max_p(train_data[label])
+        test_data.loc[:, label] = min_max_p(test_data[label])
     
     train_data = train_data.dropna(how="any")
     test_data = test_data.dropna(how="any")
@@ -70,10 +78,10 @@ def _read_data(binarize=False, balance=False):
             k_neighbors=3
         )
 
-
         X_train, y_train = smote.fit_resample(X_train, y_train)
 
-        X_resampled = pd.DataFrame(X_train, columns=CONST.features_labels)
+        columns_name = list(train_data.columns)
+        X_resampled = pd.DataFrame(X_train)
         y_resampled = pd.Series(y_train, name=targets)
 
         resampled_train_data = pd.concat([X_resampled, y_resampled], axis=1)
