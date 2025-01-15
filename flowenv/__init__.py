@@ -15,3 +15,8 @@ register(
     id='flowenv/Flow-v1',
     entry_point='flowenv.src.flow:FlowEnv',
 )
+
+register(
+    id='flowenv/MultiFlow-v1',
+    entry_point='flowenv.src.multi_flow:MultiFlowEnv',
+)

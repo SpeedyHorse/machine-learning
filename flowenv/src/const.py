@@ -1,5 +1,6 @@
 class Const(object):
     __reference_label = "Binary Label"
+    __multi_reference_label = "Label Index"
     __features_labels = [
         "Dst Port",
         "Protocol",
@@ -152,6 +153,10 @@ class Const(object):
     @property
     def reference_label(self):
         return self.__reference_label
+    
+    @property
+    def multi_reference_label(self):
+        return self.__multi_reference_label
 
     @property
     def features_labels(self):
