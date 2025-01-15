@@ -1,11 +1,17 @@
 from stable_baselines3 import A2C
 from stable_baselines3.common.env_util import make_vec_env
+import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import sys
 sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
 import flowdata
 import flowenv
+
+is_ipython = 'inline' in matplotlib.get_backend()
+if is_ipython:
+    from IPython import display
 
 def calculate_metrics(tp, tn, fp, fn):
     accuracy = (tp + tn) / (tp + fp + fn + tn)
@@ -24,6 +30,7 @@ raw_data_train, raw_data_test = flowdata.flow_data.using_data()
 # 環境の作成
 print("make env")
 env = make_vec_env("flowenv/Flow-v1", n_envs=4, env_kwargs={"data": raw_data_train})  # 複数環境で並列実行
+test_env = gym.make("flowenv/Flow-v1", data=raw_data_test)
 print("make env end")
 
 # A2Cエージェントの作成
@@ -37,26 +44,27 @@ model = A2C(
     device="cpu"
 )
 
-for i in range(100):
+for i in range(10):
     # トレーニング
-    print("train start")
-    model.learn(total_timesteps=1000)
-    print("train end")
+    print("tr_s=>", end="")
+    model.learn(total_timesteps=100000)
+    print("tr_e=>", end="")
 
-    # model.save("a2c_no5")
+    model.save("a2c_no5")
 
-    # model = A2C.load("a2c_no5")
+    models = A2C.load("a2c_no5", test_env)
+    
     # トレーニング済みモデルでテスト
-    print("test start")
+    print("te_s")
     confusion_array = np.zeros((2, 2), dtype=np.int32)
-    obs = env.reset()
+    obs, _ = test_env.reset()
     for _ in range(10000):
-        action, _states = model.predict(obs, deterministic=True)
-        obs, reward, done, info = env.step(action)
-        index = info[0]["confusion_position"]
+        action, _states = models.predict(obs, deterministic=True)
+        obs, reward, done, _, info = test_env.step(action)
+        index = info["confusion_position"]
         confusion_array[index[0], index[1]] += 1
-        if done.any():
-            obs = env.reset()
+        if done:
+            obs, _ = test_env.reset()
 
     # print(confusion_array)
 
@@ -66,10 +74,16 @@ for i in range(100):
     fn = confusion_array[1, 0]
 
     accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
-    print(accuracy, precision, recall, f1, fpr)
+    print(f"{i:3}: {accuracy:.6}, {precision:.6}, {recall:.6}, {f1:.6}, {fpr:.6}")
+else:
     plt.figure()
+    # durations_t = torch.tensor(episode_durations, dtype=torch.float)
+
+    plt.title("Result")
     plt.bar(
         ["accuracy", "precision", "recall", "f1", "fpr"],
         [accuracy, precision, recall, f1, fpr]
     )
-    plt.pause(0.1)
+    plt.grid()
+
+    plt.show()
