@@ -62,8 +62,8 @@ def _read_data(binarize=False, balance=False):
     # test_data = pd.concat([test_data.drop(columns=CATEGORICAL_FEATURES), test_data_ohe], axis=1)
 
     for label in CONST.normalization_features:
-        train_data.loc[:, label] = min_max_p(train_data[label])
-        test_data.loc[:, label] = min_max_p(test_data[label])
+        train_data.loc[:, label] = min_max_p(train_data[label]).astype(train_data[label].dtype)
+        test_data.loc[:, label] = min_max_p(test_data[label]).astype(test_data[label].dtype)
     
     train_data = train_data.dropna(how="any")
     test_data = test_data.dropna(how="any")
