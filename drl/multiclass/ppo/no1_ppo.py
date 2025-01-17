@@ -20,7 +20,9 @@ def calculate_metrics(tp, tn, fp, fn):
         recall = 0.0
     return accuracy, precision, recall, f1, fpr
 
-raw_data_train, raw_data_test = flowdata.flow_data.using_multiple_data()
+data, info = flowdata.flow_data.using_multiple_data()
+raw_data_train = data[0]
+raw_data_test = data[1]
 # 環境の作成
 print("make env")
 env = make_vec_env("flowenv/MultiFlow-v1", n_envs=4, env_kwargs={"data": raw_data_train})  # 複数環境で並列実行
@@ -38,10 +40,10 @@ model = PPO(
     n_epochs=20
 )
 
-for i in range(100):
+for i in range(10):
     print(f"train start {i}")
     # トレーニング
-    model.learn(total_timesteps=1000)
+    model.learn(total_timesteps=100000)
     print("train end")
 
     # model.save("ppo_no4")

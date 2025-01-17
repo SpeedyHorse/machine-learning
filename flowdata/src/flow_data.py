@@ -28,6 +28,8 @@ def _read_data(binarize=False, balance=False):
     train_data = pd.read_csv(TRAIN_DATA_PATH).replace([np.inf, -np.inf], np.nan).dropna(how="any").dropna(how="all", axis=1)
     test_data = pd.read_csv(TEST_DATA_PATH).replace([np.inf, -np.inf], np.nan).dropna(how="any").dropna(how="all", axis=1)
 
+    train_data = train_data.drop_duplicates()
+
     # unique
     targets = ""
     if binarize:
