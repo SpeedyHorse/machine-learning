@@ -5,6 +5,7 @@ import datetime
 from collections import deque, namedtuple
 from itertools import count
 from time import time
+from sklearn.metrics import classification_report
 
 import gymnasium as gym
 from gymnasium.vector import AsyncVectorEnv
@@ -186,33 +187,33 @@ def calculate_metrics(tp, tn, fp, fn):
         recall = 0.0
     return accuracy, precision, recall, f1, fpr
 
-def write_action_and_answer(episode=None, action=None, answer=None, first=False, test=False):
+
+def write_action_and_answer(actions=None, answers=None, test=False):
     if test:
         file_name = "action_and_answer_test.csv"
     else:
         file_name = "action_and_answer.csv"
-    if first:
-        labels = flowdata.flow_data.label_info()
-        presets = ["action", "answer"]
-        f = open(file_name, "w")
-        f.write("time,episode,action_sum,")
-        for preset in presets:
-            for label in labels:
-                f.write(f"{preset}_{label},")
-        else:
-            f.write("\n")
-        return
-    
-    dt_now = datetime.datetime.now()
-    f = open(file_name, "a")
-    sum_action = sum(action)
-    f.write(f"{dt_now.isoformat()},{episode},{sum_action},")
-    action_and_answer = action + answer
 
-    for count_num in action_and_answer:
-        f.write(f"{count_num},")
-    else:
-        f.write("\n")
+    all_data = []
+    
+    class_name = flowdata.flow_data.label_info()
+    # y_true: answer, y_pred: action
+    for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
+        report_dict = classification_report(y_true, y_pred, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
+        for class_, metrics in report_dict.items():
+            if class_ in class_name:
+                entry = {
+                    "episode": i,
+                    "class": class_,
+                    "precision": metrics["precision"],
+                    "recall": metrics["recall"],
+                    "f1-score": metrics["f1-score"],
+                    "support": metrics["support"]
+                }
+                all_data.append(entry)
+    
+    df = pd.DataFrame(all_data)
+    df.to_csv(file_name, mode="w", header=False)
 
 
 class PolicyNetwork(nn.Module):
@@ -281,8 +282,7 @@ def optimize_model():
 
 
 def test():
-    MODEL_PATH = "no4_reinforce.pth"
-    write_action_and_answer(first=True, test=True)
+    MODEL_PATH = "no3_reinforce.pth"
 
     # load the model
     trained_network = PolicyNetwork(n_inputs, n_outputs).to(device)
@@ -299,12 +299,14 @@ def test():
         "f1": [],
         "fpr": []
     }
-    count_action = [0 for _ in range(n_outputs)]
-    count_answer = [0 for _ in range(n_outputs)]
+    test_episode_action = []
+    test_episode_answer = []
 
     for i_loop in range(100):
         test_raw_state, _ = test_env.reset()
         test_state = torch.tensor(test_raw_state, device=device, dtype=torch.float32).unsqueeze(0)
+        count_action = []
+        count_answer = []
 
         for t in count():
             with torch.no_grad():
@@ -316,8 +318,8 @@ def test():
             # calculate confusion matrix
             raw = 0 if test_reward == 1 else 1
 
-            count_action[test_info["action"]] += 1
-            count_answer[test_info["answer"]] += 1
+            count_action.append(test_info["action"])
+            count_answer.append(test_info["answer"])
 
             # test_info = (row, column) means confusion matrix index
             index = test_info["confusion_position"]
@@ -329,7 +331,8 @@ def test():
             # make next state tensor and update state
             test_state = torch.tensor(test_raw_next_state, device=device, dtype=torch.float32).unsqueeze(0)
 
-        write_action_and_answer(episode=i_loop, action=count_action, answer=count_answer, test=True)
+        test_episode_action.append(count_action)
+        test_episode_answer.append(count_answer)
         # calculate metrics
         tp = confusion_array[0, 0]
         tn = confusion_array[1, 1]
@@ -344,16 +347,15 @@ def test():
         metrics_dictionary["fpr"].append(fpr)
         # print(tp, tn, fp, tn)
 
+    write_action_and_answer(test_episode_action, test_episode_answer, test=True)
     return [np.mean(metrics_dictionary["accuracy"]), np.mean(metrics_dictionary["precision"]), np.mean(metrics_dictionary["recall"]), np.mean(metrics_dictionary["f1"]), np.mean(metrics_dictionary["fpr"])]
+
 
 if __name__ == "__main__":
     NUM_ENVS = 4
 
-    raw_data_train, raw_data_test = flowdata.flow_data.using_data()
-
     train_envs = AsyncVectorEnv([make_env() for _ in range(NUM_ENVS)])
     test_env = make_env(phase="test")()
-
 
     LR = 1e-5
     GAMMA = 0.99
@@ -364,12 +366,7 @@ if __name__ == "__main__":
     n_inputs = train_envs.single_observation_space.shape[0]
     n_outputs = train_envs.single_action_space.n
 
-    # print(i_episode)
-    write_action_and_answer(first=True)
-
     num_steps = 50000
-    with open("result.csv", "w") as f:
-        f.write("batch,accuracy,precision,recall,f1,fpr\n")
 
     # for batch in range(10):
     policy_net = PolicyNetwork(n_inputs, n_outputs).to(device)
@@ -379,7 +376,7 @@ if __name__ == "__main__":
     memory = ReplayMemory(1000000)
     episode_memory = EpisodeMemory(100000)
     returns = []
-    
+
     episode_metrics = {
         "accuracy": [],
         "precision": [],
@@ -390,8 +387,10 @@ if __name__ == "__main__":
     episode_rewards = [[] for _ in range(NUM_ENVS)]
     episode_log_probs = [[] for _ in range(NUM_ENVS)]
 
-    count_action = [[0 for _ in range(n_outputs)] for _ in range(NUM_ENVS)]
-    count_answer = [[0 for _ in range(n_outputs)] for _ in range(NUM_ENVS)]
+    count_action = [[] for _ in range(NUM_ENVS)]
+    count_answer = [[] for _ in range(NUM_ENVS)]
+    test_episode_action = []
+    test_episode_answer = []
 
     confusion_matrix = np.zeros((2,2), dtype=int)
     sum_reward = 0
@@ -400,7 +399,7 @@ if __name__ == "__main__":
     BATCH_SIZE = 2 ** 8
     print(f"Batch {BATCH_SIZE}: start")
     seeds = [random.randint(0, 100000) for _ in range(NUM_ENVS)]
-    #print(seeds)
+    # print(seeds)
     initial_states, info = train_envs.reset(seed=seeds)
     states = torch.tensor(initial_states, device=device, dtype=torch.float32).unsqueeze(0)
 
@@ -417,8 +416,8 @@ if __name__ == "__main__":
             confusion_matrix[item[0], item[1]] += 1
         
         for i in range(NUM_ENVS):
-            count_action[i][info["action"][i]] += 1
-            count_answer[i][info["answer"][i]] += 1
+            count_action[i].append(info["action"][i])
+            count_answer[i].append(info["answer"][i])
 
         rewards = torch.tensor(rewards, device=device, dtype=torch.float32)
         for i in range(NUM_ENVS):
@@ -428,11 +427,14 @@ if __name__ == "__main__":
                 buf_rewards = torch.tensor(episode_rewards[i], dtype=torch.float32)
                 buf_log_probs = torch.tensor(episode_log_probs[i], dtype=torch.float32)
                 episode_memory.push(buf_rewards, buf_log_probs)
-                write_action_and_answer(episode=t, action=count_action[i], answer=count_answer[i])
+                
+                test_episode_action.append(count_action[i])
+                test_episode_answer.append(count_answer[i])
+
                 episode_rewards = [[] for _ in range(NUM_ENVS)]
                 episode_log_probs = [[] for _ in range(NUM_ENVS)]
-                count_action = [[0 for _ in range(n_outputs)] for _ in range(NUM_ENVS)]
-                count_answer = [[0 for _ in range(n_outputs)] for _ in range(NUM_ENVS)]
+                count_action = [[] for _ in range(NUM_ENVS)]
+                count_answer = [[] for _ in range(NUM_ENVS)]
                 next_states, _ = train_envs.reset(seed=random.randint(0, 100000))
                 accuracy = (confusion_matrix[0, 0] + confusion_matrix[1, 1]) / confusion_matrix.sum()
                 episode_accuracy.append(accuracy)
@@ -448,7 +450,8 @@ if __name__ == "__main__":
             if t % 25 == 0:
                 plot_accuracy(episode_accuracy)
     else:
-        torch.save(policy_net.state_dict(), "no4_reinforce.pth")  # save the model
+        write_action_and_answer(test_episode_action, test_episode_answer)
+        torch.save(policy_net.state_dict(), "no3_reinforce.pth")  # save the model
 
     print("test start")
     for i in range(5):
