@@ -148,6 +148,11 @@ class Const(object):
         "MITM_DOS",
         "REPLAY",
         "DNP3_ENUMERATE",
+        "COLD_RESTART",
+        "DISABLE_UNSOLICITED",
+        "DNP3_INFO",
+        "STOP_APP",
+        "WARM_RESTART",
     ]
     
     @property
