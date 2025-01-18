@@ -24,18 +24,35 @@ def calculate_metrics(tp, tn, fp, fn):
         recall = 0.0
     return accuracy, precision, recall, f1, fpr
 
-def write_action_and_answer(actions=None, answers=None, test=False):
+def write_action_and_answer(episode=None, actions=None, answers=None, test=False):
+    all_data = []
+    class_name = flowdata.flow_data.label_info()
     if test:
         file_name = "action_and_answer_test.csv"
-    else:
-        file_name = "action_and_answer.csv"
+        report_dict = classification_report(
+            answers, actions, labels=[i for i in range(len(class_name))], 
+            target_names=class_name, output_dict=True, zero_division=0
+        )
 
-    all_data = []
+        for class_, metrics in report_dict.items():
+            if class_ in class_name:
+                entry = {
+                    "episode": episode,
+                    "class": class_,
+                    "precision": metrics["precision"],
+                    "recall": metrics["recall"],
+                    "f1-score": metrics["f1-score"],
+                    "support": metrics["support"]
+                }
+                all_data.append(entry)
+        df = pd.DataFrame(all_data)
+        df.to_csv(file_name, mode="w", header=False)
+        return
     
-    class_name = flowdata.flow_data.label_info()
+    file_name = "action_and_answer.csv"
     # y_true: answer, y_pred: action
     for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
-        report_dict = classification_report(y_true, y_pred, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
+        report_dict = classification_report(y_true, y_pred, labels=[i for i in range(len(class_name))], target_names=class_name, output_dict=True, zero_division=0)
         for class_, metrics in report_dict.items():
             if class_ in class_name:
                 entry = {

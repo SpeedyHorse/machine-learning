@@ -19,7 +19,11 @@ def write_action_and_answer(episode=None, actions=None, answers=None, test=False
     class_name = flowdata.flow_data.label_info()
     if test:
         file_name = "action_and_answer_test.csv"
-        report_dict = classification_report(answers, actions, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
+        report_dict = classification_report(
+            answers, actions, labels=[i for i in range(len(class_name))], 
+            target_names=class_name, output_dict=True, zero_division=0
+        )
+
         for class_, metrics in report_dict.items():
             if class_ in class_name:
                 entry = {
@@ -38,7 +42,7 @@ def write_action_and_answer(episode=None, actions=None, answers=None, test=False
     file_name = "action_and_answer.csv"
     # y_true: answer, y_pred: action
     for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
-        report_dict = classification_report(y_true, y_pred, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
+        report_dict = classification_report(y_true, y_pred, labels=[i for i in range(len(class_name))], target_names=class_name, output_dict=True, zero_division=0)
         for class_, metrics in report_dict.items():
             if class_ in class_name:
                 entry = {
