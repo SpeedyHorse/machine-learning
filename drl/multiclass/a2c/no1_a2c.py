@@ -10,6 +10,8 @@ import datetime
 sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
 import flowdata
 import flowenv
+import pandas as pd
+from sklearn.metrics import classification_report
 
 is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
@@ -28,34 +30,32 @@ def calculate_metrics(tp, tn, fp, fn):
         recall = 0.0
     return accuracy, precision, recall, f1, fpr
 
-def write_action_and_answer(episode=None, action=None, answer=None, first=False, test=False):
+def write_action_and_answer(actions=None, answers=None, test=False):
     if test:
         file_name = "action_and_answer_test.csv"
     else:
         file_name = "action_and_answer.csv"
-    if first:
-        labels = flowdata.flow_data.label_info()
-        presets = ["action", "answer"]
-        f = open(file_name, "w")
-        f.write("time,episode,action_sum,")
-        for preset in presets:
-            for label in labels:
-                f.write(f"{preset}_{label},")
-        else:
-            f.write("\n")
-        return
-    
-    dt_now = datetime.datetime.now()
-    f = open(file_name, "a")
-    sum_action = sum(action)
-    f.write(f"{dt_now.isoformat()},{episode},{sum_action},")
-    action_and_answer = action + answer
 
-    for count_num in action_and_answer:
-        f.write(f"{count_num},")
-    else:
-        f.write("\n")
-        f.write("\n")
+    all_data = []
+    
+    class_name = flowdata.flow_data.label_info()
+    # y_true: answer, y_pred: action
+    for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
+        report_dict = classification_report(y_true, y_pred, target_names=class_name, output_dict=True)
+        for class_, metrics in report_dict.items():
+            if class_ in class_name:
+                entry = {
+                    "episode": i,
+                    "class": class_,
+                    "precision": metrics["precision"],
+                    "recall": metrics["recall"],
+                    "f1-score": metrics["f1-score"],
+                    "support": metrics["support"]
+                }
+                all_data.append(entry)
+    
+    df = pd.DataFrame(all_data)
+    df.to_csv(file_name, mode="w", header=False)
 
 
 data, info = flowdata.flow_data.using_multiple_data()
@@ -67,7 +67,6 @@ env = make_vec_env("flowenv/MultiFlow-v1", n_envs=4, env_kwargs={"data": raw_dat
 test_env = gym.make("flowenv/MultiFlow-v1", data=raw_data_test)
 print("make env end")
 
-write_action_and_answer(first=True, test=True)
 # A2Cエージェントの作成
 print("make model")
 model = A2C(
@@ -80,54 +79,47 @@ model = A2C(
 )
 
 n_outputs = test_env.action_space.n
-count_action = [0 for _ in range(n_outputs)]
-count_answer = [0 for _ in range(n_outputs)]
+count_action = []
+count_answer = []
+test_episode_actions = []
+test_episode_answers = []
 
 for i in range(10):
     # トレーニング
-    print("tr_s=>", end="")
+    print("tr_s:1 =>", end="")
     model.learn(total_timesteps=100000)
-    print("tr_e=>", end="")
+    print("tr_e")
 
-    model.save("no1_a2c")
+model.save("no1_a2c")
 
-    models = A2C.load("no1_a2c", test_env)
-    
-    # トレーニング済みモデルでテスト
-    print("te_s")
-    confusion_array = np.zeros((2, 2), dtype=np.int32)
-    obs, _ = test_env.reset()
-    for _ in range(10000):
-        action, _states = models.predict(obs, deterministic=True)
-        obs, reward, done, _, info = test_env.step(action)
-        index = info["confusion_position"]
+models = A2C.load("no1_a2c", test_env)
 
-        count_action[info["action"]] += 1
-        count_answer[info["answer"]] += 1
+# トレーニング済みモデルでテスト
+print("te_s")
+confusion_array = np.zeros((2, 2), dtype=np.int32)
+obs, _ = test_env.reset()
+for _ in range(10000):
+    action, _states = models.predict(obs, deterministic=True)
+    obs, reward, done, _, info = test_env.step(action)
+    index = info["confusion_position"]
 
-        confusion_array[index[0], index[1]] += 1
-        if done:
-            obs, _ = test_env.reset()
-            write_action_and_answer(i, count_action, count_answer, test=True)
+    count_action.append(info["action"])
+    count_answer.append(info["answer"])
 
-    # print(confusion_array)
+    confusion_array[index[0], index[1]] += 1
+    if done:
+        obs, _ = test_env.reset()
+        test_episode_actions.append(count_action)
+        test_episode_answers.append(count_answer)
+        count_action = []
+        count_answer = []
 
-    tp = confusion_array[0, 0]
-    tn = confusion_array[1, 1]
-    fp = confusion_array[0, 1]
-    fn = confusion_array[1, 0]
+write_action_and_answer(test_episode_actions, test_episode_answers, test=True)
+# print(confusion_array)
+tp = confusion_array[0, 0]
+tn = confusion_array[1, 1]
+fp = confusion_array[0, 1]
+fn = confusion_array[1, 0]
 
-    accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
-    print(f"{i:3}: {accuracy:.6}, {precision:.6}, {recall:.6}, {f1:.6}, {fpr:.6}")
-else:
-    plt.figure()
-    # durations_t = torch.tensor(episode_durations, dtype=torch.float)
-
-    plt.title("Result")
-    plt.bar(
-        ["accuracy", "precision", "recall", "f1", "fpr"],
-        [accuracy, precision, recall, f1, fpr]
-    )
-    plt.grid()
-
-    plt.show()
+accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
+print(f"{i:3}: {accuracy:.6}, {precision:.6}, {recall:.6}, {f1:.6}, {fpr:.6}")
