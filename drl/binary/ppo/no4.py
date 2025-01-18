@@ -38,10 +38,10 @@ model = PPO(
     n_epochs=20
 )
 
-for i in range(100):
+for i in range(10):
     print(f"train start {i}")
     # トレーニング
-    model.learn(total_timesteps=1000)
+    model.learn(total_timesteps=100000)
     print("train end")
 
     # model.save("ppo_no4")
@@ -69,6 +69,7 @@ for i in range(100):
 
     accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
     print(accuracy, precision, recall, f1, fpr)
+else:
     plt.figure()
     plt.bar(
         ["accuracy", "precision", "recall", "f1", "fpr"],
