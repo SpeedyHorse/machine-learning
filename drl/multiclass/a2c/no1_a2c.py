@@ -41,7 +41,7 @@ def write_action_and_answer(actions=None, answers=None, test=False):
     class_name = flowdata.flow_data.label_info()
     # y_true: answer, y_pred: action
     for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
-        report_dict = classification_report(y_true, y_pred, target_names=class_name, output_dict=True)
+        report_dict = classification_report(y_true, y_pred, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
         for class_, metrics in report_dict.items():
             if class_ in class_name:
                 entry = {
@@ -86,7 +86,7 @@ test_episode_answers = []
 
 for i in range(10):
     # トレーニング
-    print("tr_s:1 =>", end="")
+    print(f"tr_s:{i} =>", end="")
     model.learn(total_timesteps=100000)
     print("tr_e")
 

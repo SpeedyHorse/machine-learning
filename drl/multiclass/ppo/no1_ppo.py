@@ -35,7 +35,7 @@ def write_action_and_answer(actions=None, answers=None, test=False):
     class_name = flowdata.flow_data.label_info()
     # y_true: answer, y_pred: action
     for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
-        report_dict = classification_report(y_true, y_pred, target_names=class_name, output_dict=True)
+        report_dict = classification_report(y_true, y_pred, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
         for class_, metrics in report_dict.items():
             if class_ in class_name:
                 entry = {
@@ -51,7 +51,6 @@ def write_action_and_answer(actions=None, answers=None, test=False):
     df = pd.DataFrame(all_data)
     df.to_csv(file_name, mode="w", header=False)
 
-write_action_and_answer(first=True, test=True)
 data, info = flowdata.flow_data.using_multiple_data()
 raw_data_train = data[0]
 raw_data_test = data[1]
