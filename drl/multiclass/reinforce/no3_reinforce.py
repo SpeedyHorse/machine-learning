@@ -188,15 +188,28 @@ def calculate_metrics(tp, tn, fp, fn):
     return accuracy, precision, recall, f1, fpr
 
 
-def write_action_and_answer(actions=None, answers=None, test=False):
+def write_action_and_answer(episode=None, actions=None, answers=None, test=False):
+    all_data = []
+    class_name = flowdata.flow_data.label_info()
     if test:
         file_name = "action_and_answer_test.csv"
-    else:
-        file_name = "action_and_answer.csv"
-
-    all_data = []
+        report_dict = classification_report(answers, actions, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
+        for class_, metrics in report_dict.items():
+            if class_ in class_name:
+                entry = {
+                    "episode": episode,
+                    "class": class_,
+                    "precision": metrics["precision"],
+                    "recall": metrics["recall"],
+                    "f1-score": metrics["f1-score"],
+                    "support": metrics["support"]
+                }
+                all_data.append(entry)
+        df = pd.DataFrame(all_data)
+        df.to_csv(file_name, mode="w", header=False)
+        return
     
-    class_name = flowdata.flow_data.label_info()
+    file_name = "action_and_answer.csv"
     # y_true: answer, y_pred: action
     for i, (y_true, y_pred) in enumerate(zip(answers, actions)):
         report_dict = classification_report(y_true, y_pred, labels=[0, 1, 2, 3, 4], target_names=class_name, output_dict=True, zero_division=0)
@@ -299,15 +312,13 @@ def test():
         "f1": [],
         "fpr": []
     }
-    test_episode_action = []
-    test_episode_answer = []
+    count_action = []
+    count_answer = []
 
     for i_loop in range(100):
         test_raw_state, _ = test_env.reset()
         test_state = torch.tensor(test_raw_state, device=device, dtype=torch.float32).unsqueeze(0)
-        count_action = []
-        count_answer = []
-
+        
         for t in count():
             with torch.no_grad():
                 prob_distribution = trained_network(test_state)
@@ -331,8 +342,6 @@ def test():
             # make next state tensor and update state
             test_state = torch.tensor(test_raw_next_state, device=device, dtype=torch.float32).unsqueeze(0)
 
-        test_episode_action.append(count_action)
-        test_episode_answer.append(count_answer)
         # calculate metrics
         tp = confusion_array[0, 0]
         tn = confusion_array[1, 1]
@@ -347,7 +356,7 @@ def test():
         metrics_dictionary["fpr"].append(fpr)
         # print(tp, tn, fp, tn)
 
-    write_action_and_answer(test_episode_action, test_episode_answer, test=True)
+    write_action_and_answer(1000, count_action, count_answer, test=True)
     return [np.mean(metrics_dictionary["accuracy"]), np.mean(metrics_dictionary["precision"]), np.mean(metrics_dictionary["recall"]), np.mean(metrics_dictionary["f1"]), np.mean(metrics_dictionary["fpr"])]
 
 
@@ -387,11 +396,6 @@ if __name__ == "__main__":
     episode_rewards = [[] for _ in range(NUM_ENVS)]
     episode_log_probs = [[] for _ in range(NUM_ENVS)]
 
-    count_action = [[] for _ in range(NUM_ENVS)]
-    count_answer = [[] for _ in range(NUM_ENVS)]
-    test_episode_action = []
-    test_episode_answer = []
-
     confusion_matrix = np.zeros((2,2), dtype=int)
     sum_reward = 0
     episode_accuracy = []
@@ -414,10 +418,6 @@ if __name__ == "__main__":
         # calculate confusion matrix
         for item in info["confusion_position"]:
             confusion_matrix[item[0], item[1]] += 1
-        
-        for i in range(NUM_ENVS):
-            count_action[i].append(info["action"][i])
-            count_answer[i].append(info["answer"][i])
 
         rewards = torch.tensor(rewards, device=device, dtype=torch.float32)
         for i in range(NUM_ENVS):
@@ -428,9 +428,6 @@ if __name__ == "__main__":
                 buf_log_probs = torch.tensor(episode_log_probs[i], dtype=torch.float32)
                 episode_memory.push(buf_rewards, buf_log_probs)
                 
-                test_episode_action.append(count_action[i])
-                test_episode_answer.append(count_answer[i])
-
                 episode_rewards = [[] for _ in range(NUM_ENVS)]
                 episode_log_probs = [[] for _ in range(NUM_ENVS)]
                 count_action = [[] for _ in range(NUM_ENVS)]
@@ -450,7 +447,6 @@ if __name__ == "__main__":
             if t % 25 == 0:
                 plot_accuracy(episode_accuracy)
     else:
-        write_action_and_answer(test_episode_action, test_episode_answer)
         torch.save(policy_net.state_dict(), "no3_reinforce.pth")  # save the model
 
     print("test start")
