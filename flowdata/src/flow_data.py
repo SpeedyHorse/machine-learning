@@ -104,3 +104,6 @@ def using_multiple_data():
     index_info = ["Normal"] + ATTACK_LABELS
 
     return _read_data(binarize=False, balance=True), index_info
+
+def label_info():
+    return ["Normal"] + ATTACK_LABELS
