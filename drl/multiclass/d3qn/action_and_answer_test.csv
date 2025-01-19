@@ -1,5 +1,4 @@
 episode,class,precision,recall,f1,support
-
 1,Normal,0.17973185167290737,1.0,0.30469949831063786,1488.0
 1,ARP_POISONING,0.0,0.0,0.0,779.0
 1,MITM_DOS,0.0,0.0,0.0,781.0
