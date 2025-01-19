@@ -70,6 +70,9 @@ for i in range(10):
     accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
     print(accuracy, precision, recall, f1, fpr)
 else:
+    with open("test_result.csv", "w") as f:
+        f.write("accuracy,precision,recall,f1,fpr\n")
+        f.write(f"{accuracy},{precision},{recall},{f1},{fpr}\n")
     plt.figure()
     plt.bar(
         ["accuracy", "precision", "recall", "f1", "fpr"],

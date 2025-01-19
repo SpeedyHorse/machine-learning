@@ -78,6 +78,9 @@ for i in range(10):
 else:
     plt.figure()
     # durations_t = torch.tensor(episode_durations, dtype=torch.float)
+    with open("test_result.csv", "w") as f:
+        f.write("accuracy,precision,recall,f1,fpr\n")
+        f.write(f"{accuracy},{precision},{recall},{f1},{fpr}\n")
 
     plt.title("Result")
     plt.bar(
