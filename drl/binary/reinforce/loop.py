@@ -39,9 +39,9 @@ device = torch.device(device_name)
 print(f"device: {device_name}")
 
 import sys
-sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
+# sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
 # sys.path.append("/Users/toshi/Documents/school/machine-learning")
-# sys.path.append(r"C:\Users\takat\PycharmProjects\machine-learning")
+sys.path.append(r"C:\Users\takat\PycharmProjects\machine-learning")
 import flowdata
 import flowenv
 
