@@ -92,13 +92,11 @@ model = PPO(
 n_outputs = test_env.action_space.n
 count_action = []
 count_answer = []
-test_episode_actions = []
-test_episode_answers = []
 
 for i in range(10):
     print(f"train start {i}")
     # トレーニング
-    model.learn(total_timesteps=100000)
+    model.learn(total_timesteps=10000)
     print("train end")
 
 model.save("ppo_no1")
@@ -120,14 +118,10 @@ for _ in range(10000):
     confusion_array[index[0], index[1]] += 1
     if done:
         obs, _ = test_env.reset()
-        test_episode_actions.append(count_action)
-        test_episode_answers.append(count_answer)
-        count_action = []
-        count_answer = []
 
 # print(confusion_array)
 
-write_action_and_answer(test_episode_actions, test_episode_answers, test=True)
+write_action_and_answer(episode=10000, actions=count_action, answers=count_answer, test=True)
 tp = confusion_array[0, 0]
 tn = confusion_array[1, 1]
 fp = confusion_array[0, 1]
