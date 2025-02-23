@@ -39,9 +39,9 @@ device = torch.device(device_name)
 print(f"device: {device_name}")
 
 import sys
-# sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
+sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
 # sys.path.append("/Users/toshi/Documents/school/machine-learning")
-sys.path.append(r"C:\Users\takat\PycharmProjects\machine-learning")
+# sys.path.append(r"C:\Users\takat\PycharmProjects\machine-learning")
 import flowdata
 import flowenv
 
@@ -181,13 +181,13 @@ class PolicyNetwork(nn.Module):
     def __init__(self, n_inputs, n_outputs):
         super(PolicyNetwork, self).__init__()
         self.common_fc = nn.Sequential(
-            nn.Linear(n_inputs, 128),
+            nn.Linear(n_inputs, 512),
             nn.ReLU(),
-            nn.Linear(128, 128),
+            nn.Linear(512, 512),
             nn.ReLU()
         )
         self.probs = nn.Sequential(
-            nn.Linear(128, n_outputs),
+            nn.Linear(512, n_outputs),
             nn.Softmax(dim=-1)
         )
 
@@ -282,10 +282,10 @@ def test():
             test_state = torch.tensor(test_raw_next_state, device=device, dtype=torch.float32).unsqueeze(0)
 
         # calculate metrics
-        tp = confusion_array[0, 0]
-        tn = confusion_array[1, 1]
-        fp = confusion_array[0, 1]
-        fn = confusion_array[1, 0]
+        tp = confusion_array[1, 1]
+        tn = confusion_array[0, 0]
+        fp = confusion_array[1, 0]
+        fn = confusion_array[0, 1]
 
         accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
         metrics_dictionary["accuracy"].append(accuracy)

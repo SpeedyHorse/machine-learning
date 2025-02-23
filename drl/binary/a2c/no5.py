@@ -47,7 +47,7 @@ model = A2C(
 for i in range(10):
     # トレーニング
     print("tr_s=>", end="")
-    model.learn(total_timesteps=100000)
+    model.learn(total_timesteps=500000)
     print("tr_e=>", end="")
 
     model.save("a2c_no5")

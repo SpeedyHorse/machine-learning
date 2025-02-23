@@ -440,6 +440,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "scikit-learn" },
+    { name = "stable-baselines3" },
     { name = "torch" },
 ]
 
@@ -454,6 +455,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.2.1" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "scikit-learn", specifier = ">=1.6.0" },
+    { name = "stable-baselines3", specifier = ">=2.5.0" },
     { name = "torch", specifier = ">=2.5.1" },
 ]
 
@@ -1073,6 +1075,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/23/7e/c5b43911ca5813eadfe1fd3f0a5e97f4f23c5006fba935b1172f350b4d17/sklearn_compat-0.1.3.tar.gz", hash = "sha256:74f8267613249d599aa3a2f2503af32fa51bce0800b1b0b0a57b52354402454e", size = 65857 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f0/a8/ad69cf130fbd017660cdd64abbef3f28135d9e2e15fe3002e03c5be0ca38/sklearn_compat-0.1.3-py3-none-any.whl", hash = "sha256:a8aaf8ef711988cbd63f187c5560b5f16b25df663aaa1d2d0e1291341d339f80", size = 18995 },
+]
+
+[[package]]
+name = "stable-baselines3"
+version = "2.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cloudpickle" },
+    { name = "gymnasium" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "torch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/6d/1857d8ca1171346d2c35fd6a3cf63a8179143a35eed242eab5726e41e4e1/stable_baselines3-2.5.0.tar.gz", hash = "sha256:97c953b3f8f1a7a06024f0e3165a6c633444ddaea43be20617023d924aaa1e96", size = 213161 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/ce/09ff2f03ba06b1355ca6b21554dbebbca5da4cb8ee6c1eb12e8151ab476b/stable_baselines3-2.5.0-py3-none-any.whl", hash = "sha256:cd9ff4201794ee724f693d5380d40cbe8fd2f08c454a5d5aadda737e937244f0", size = 183933 },
 ]
 
 [[package]]

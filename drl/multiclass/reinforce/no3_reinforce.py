@@ -343,10 +343,10 @@ def test():
             test_state = torch.tensor(test_raw_next_state, device=device, dtype=torch.float32).unsqueeze(0)
 
         # calculate metrics
-        tp = confusion_array[0, 0]
-        tn = confusion_array[1, 1]
-        fp = confusion_array[0, 1]
-        fn = confusion_array[1, 0]
+        tp = confusion_array[1, 1]
+        tn = confusion_array[0, 0]
+        fp = confusion_array[1, 0]
+        fn = confusion_array[0, 1]
 
         accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
         metrics_dictionary["accuracy"].append(accuracy)
