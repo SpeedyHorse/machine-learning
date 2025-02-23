@@ -39,8 +39,8 @@ device = torch.device(device_name)
 print(f"device: {device_name}")
 
 import sys
-sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
-# sys.path.append("/Users/toshi/Documents/school/machine-learning")
+# sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
+sys.path.append("/Users/toshi/Documents/school/machine-learning")
 # sys.path.append(r"C:\Users\takat\PycharmProjects\machine-learning")
 import flowdata
 import flowenv
@@ -181,13 +181,13 @@ class PolicyNetwork(nn.Module):
     def __init__(self, n_inputs, n_outputs):
         super(PolicyNetwork, self).__init__()
         self.common_fc = nn.Sequential(
-            nn.Linear(n_inputs, 512),
+            nn.Linear(n_inputs, 256),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(256, 256),
             nn.ReLU()
         )
         self.probs = nn.Sequential(
-            nn.Linear(512, n_outputs),
+            nn.Linear(256, n_outputs),
             nn.Softmax(dim=-1)
         )
 
@@ -317,17 +317,17 @@ if __name__ == "__main__":
 
     # print(i_episode)
 
-    num_steps = 50000
+    num_steps = 100000
     with open("result.csv", "w") as f:
         f.write("batch,accuracy,precision,recall,f1,fpr\n")
 
-    for batch in range(10):
+    for batch in range(5, 10):
         policy_net = PolicyNetwork(n_inputs, n_outputs).to(device)
         optimizer = optim.Adam(policy_net.parameters(), lr=LR)
 
         steps_done = 0
         memory = ReplayMemory(1000000)
-        episode_memory = EpisodeMemory(100000)
+        episode_memory = EpisodeMemory(1000000)
         returns = []
         
         episode_metrics = {
@@ -346,7 +346,7 @@ if __name__ == "__main__":
 
         BATCH_SIZE = 2 ** batch
         print(f"Batch {BATCH_SIZE}: start")
-        seeds = [random.randint(0, 100000) for _ in range(NUM_ENVS)]
+        seeds = [random.randint(0, 1000000) for _ in range(NUM_ENVS)]
         #print(seeds)
         initial_states, info = train_envs.reset(seed=seeds)
         states = torch.tensor(initial_states, device=device, dtype=torch.float32).unsqueeze(0)
