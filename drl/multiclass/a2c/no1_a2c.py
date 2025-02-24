@@ -129,10 +129,10 @@ for _ in range(10000):
 
 write_action_and_answer(episode=10000, actions=count_action, answers=count_answer, test=True)
 # print(confusion_array)
-tp = confusion_array[0, 0]
-tn = confusion_array[1, 1]
-fp = confusion_array[0, 1]
-fn = confusion_array[1, 0]
+tp = confusion_array[1, 1]
+tn = confusion_array[0, 0]
+fp = confusion_array[1, 0]
+fn = confusion_array[0, 1]
 
 accuracy, precision, recall, f1, fpr = calculate_metrics(tp, tn, fp, fn)
 print(f"{i:3}: {accuracy:.6}, {precision:.6}, {recall:.6}, {f1:.6}, {fpr:.6}")

@@ -39,8 +39,8 @@ device = torch.device(device_name)
 print(f"device: {device_name}")
 
 import sys
-# sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
-sys.path.append("/Users/toshi/Documents/school/machine-learning")
+sys.path.append("/Users/toshi_pro/Documents/github-sub/machine-learning")
+# sys.path.append("/Users/toshi/Documents/school/machine-learning")
 # sys.path.append(r"C:\Users\takat\PycharmProjects\machine-learning")
 import flowdata
 import flowenv
@@ -219,7 +219,7 @@ def calculate_returns(rewards):
 
 def optimize_model():
     # print(log_probs)
-    if len(memory) < BATCH_SIZE:
+    if len(memory) < BATCH_SIZE or len(memory) % BATCH_SIZE != 0:
         return
     # trajectory = episode_memory.sample(BATCH_SIZE)
     trajectory = episode_memory.sample_random(BATCH_SIZE)
@@ -306,9 +306,9 @@ if __name__ == "__main__":
     test_env = gym.make("flowenv/Flow-v1", data=raw_data_test)
 
 
-    LR = 1e-5
+    LR = 1e-3
     GAMMA = 0.99
-    BATCH_SIZE = 32
+    BATCH_SIZE = 128
 
     num_episodes = 10000
 
@@ -317,89 +317,98 @@ if __name__ == "__main__":
 
     # print(i_episode)
 
-    num_steps = 100000
+    num_steps = 1000000
     with open("result.csv", "w") as f:
         f.write("batch,accuracy,precision,recall,f1,fpr\n")
 
-    for batch in range(5, 10):
-        policy_net = PolicyNetwork(n_inputs, n_outputs).to(device)
-        optimizer = optim.Adam(policy_net.parameters(), lr=LR)
 
-        steps_done = 0
-        memory = ReplayMemory(1000000)
-        episode_memory = EpisodeMemory(1000000)
-        returns = []
-        
-        episode_metrics = {
-            "accuracy": [],
-            "precision": [],
-            "recall": [],
-            "f1": [],
-            "fpr": []
-        }
-        episode_rewards = [[] for _ in range(NUM_ENVS)]
-        episode_log_probs = [[] for _ in range(NUM_ENVS)]
+    policy_net = PolicyNetwork(n_inputs, n_outputs).to(device)
+    optimizer = optim.Adam(policy_net.parameters(), lr=LR)
 
-        confusion_matrix = np.zeros((2,2), dtype=int)
-        sum_reward = 0
-        episode_accuracy = []
+    steps_done = 0
+    memory = ReplayMemory(1000000)
+    episode_memory = EpisodeMemory(1000000)
+    returns = []
+    
+    episode_metrics = {
+        "accuracy": [],
+        "precision": [],
+        "recall": [],
+        "f1": [],
+        "fpr": []
+    }
+    episode_rewards = [[] for _ in range(NUM_ENVS)]
+    episode_log_probs = [[] for _ in range(NUM_ENVS)]
 
-        BATCH_SIZE = 2 ** batch
-        print(f"Batch {BATCH_SIZE}: start")
-        seeds = [random.randint(0, 1000000) for _ in range(NUM_ENVS)]
-        #print(seeds)
-        initial_states, info = train_envs.reset(seed=seeds)
+    confusion_matrix = np.zeros((2,2), dtype=int)
+    sum_reward = 0
+    episode_accuracy = []
+
+    # BATCH_SIZE = 2 ** batch
+    batch = BATCH_SIZE
+    print(f"Batch {BATCH_SIZE}: start")
+    seeds = [random.randint(0, 1000000) for _ in range(NUM_ENVS)]
+    #print(seeds)
+    initial_states, info = train_envs.reset(seed=seeds)
+    states = torch.tensor(initial_states, device=device, dtype=torch.float32).unsqueeze(0)
+
+
+    for i_episode in range(num_episodes):
+        index_list = [i for i in range(NUM_ENVS)]
+        random.seed(i_episode)
+        # target_index = random.choice(index_list)
+        initial_states, info = train_envs.reset()
         states = torch.tensor(initial_states, device=device, dtype=torch.float32).unsqueeze(0)
 
-        for t in range(num_steps):
-            # Select and perform an action
+        for t in count():
             actions, log_probs = select_action(states)
+            # print(log_probs)
             actions_np = actions.cpu().numpy()[0]
             train_envs.step_async(actions_np)
 
             next_states, rewards, terminated, truncated, info = train_envs.step_wait()
 
-            # calculate confusion matrix
-            for item in info["confusion_position"]:
-                confusion_matrix[item[0], item[1]] += 1
+            print(index_list, info["confusion_position"])
+            for item in index_list:
+                confusion_matrix[
+                    info["confusion_position"][item][0],
+                    info["confusion_position"][item][1]
+                ] += 1
 
             rewards = torch.tensor(rewards, device=device, dtype=torch.float32)
-            for i in range(NUM_ENVS):
+            
+            for i in index_list:
                 episode_rewards[i].append(rewards[i])
+                episode_log_probs[i].append(log_probs[0][i])
 
                 if terminated[i] or truncated[i]:
                     buf_rewards = torch.tensor(episode_rewards[i], dtype=torch.float32)
                     buf_log_probs = torch.tensor(episode_log_probs[i], dtype=torch.float32)
                     episode_memory.push(buf_rewards, buf_log_probs)
-                    #print(buf_rewards)
-                    # one_rewards = torch.cat(buf_rewards)
-                    # one_log_probs = torch.cat(buf_log_probs)
-                    # episode_memory.push(one_rewards, one_log_probs)
-                    episode_rewards = [[] for _ in range(NUM_ENVS)]
-                    episode_log_probs = [[] for _ in range(NUM_ENVS)]
-                    next_states, _ = train_envs.reset(seed=random.randint(0, 1000))
+                    index_list.remove(i)
+                    episode_rewards[i] = []
+                    episode_log_probs[i] = []
+
                     accuracy = (confusion_matrix[0, 0] + confusion_matrix[1, 1]) / confusion_matrix.sum()
                     episode_accuracy.append(accuracy)
                     optimize_model()
-
-            # to tensor
+            
+            if len(index_list) == 0:
+                break
+            
             next_states = torch.tensor(next_states, device=device, dtype=torch.float32).unsqueeze(0)
-
             states = next_states
-
-            # not reuse graph
-            if t > 0:
-                if t % 25 == 0:
-                    plot_accuracy(episode_accuracy)
-        else:
-            torch.save(policy_net.state_dict(), "no4_reinforce.pth")  # save the model
-            print(f"Batch {batch}: done")
         
-        print("test start")
-        for i in range(5):
-            ac, pr, re, f1, fp = test()
-            with open("result.csv", "a") as f:
-                f.write(f"{batch},{ac},{pr},{re},{f1},{fp}\n")
-            print(ac, pr, re, f1, fp)
-        print("test done")
-        batch *= 2
+        plot_accuracy(episode_accuracy)
+    else:
+        torch.save(policy_net.state_dict(), "no4_reinforce.pth")
+        print(f"Batch {batch}: done")
+
+    
+    print("test start")
+    for i in range(5):
+        ac, pr, re, f1, fp = test()
+        with open("result.csv", "a") as f:
+            f.write(f"{batch},{ac},{pr},{re},{f1},{fp}\n")
+        print(ac, pr, re, f1, fp)
+    print("test done")
