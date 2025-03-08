@@ -110,6 +110,9 @@ model.save("no1_a2c")
 models = A2C.load("no1_a2c", test_env)
 
 # トレーニング済みモデルでテスト
+with ("test_past.csv", "w") as f:
+    f.write("action,answer\n")
+
 print("te_s")
 confusion_array = np.zeros((2, 2), dtype=np.int32)
 obs, _ = test_env.reset()
@@ -120,9 +123,14 @@ for _ in range(10000):
 
     count_action.append(info["action"])
     count_answer.append(info["answer"])
-
+    
+    with open("test_past.csv", "a") as f:
+        f.write(f"{info['action']},{info['answer']}\n")
+    
     confusion_array[index[0], index[1]] += 1
     if done:
+        with open("test_past.csv", "a") as f:
+            f.write("\n")
         obs, _ = test_env.reset()
 
 

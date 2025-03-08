@@ -104,6 +104,9 @@ model.save("ppo_no1")
 test_model = PPO.load("ppo_no1", test_env)
 
 # トレーニング済みモデルでテスト
+with open("test_past.csv", "w") as f:
+    f.write("action,answer\n")
+
 print("test start")
 confusion_array = np.zeros((2, 2), dtype=np.int32)
 obs, _ = test_env.reset()
@@ -115,8 +118,13 @@ for _ in range(10000):
     count_action.append(info["action"])
     count_answer.append(info["answer"])
 
+    with open("test_past.csv", "a") as f:
+        f.write(f"{info['action']},{info['answer']}\n")
+
     confusion_array[index[0], index[1]] += 1
     if done:
+        with open("test_past.csv", "a") as f:
+            f.write("\n")
         obs, _ = test_env.reset()
 
 # print(confusion_array)
