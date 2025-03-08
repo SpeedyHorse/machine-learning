@@ -4,6 +4,7 @@ from flowenv.src.const import Const
 from pathlib import Path
 from sklearn.preprocessing import OneHotEncoder
 from imblearn.over_sampling import SMOTENC
+import kagglehub as kh
 
 
 def min_max_p(p):
@@ -15,13 +16,17 @@ def min_max_p(p):
 CONST = Const()
 ATTACK_LABELS = CONST.attack_labels
 
-TRAIN_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_Balanced_CSV_Files/CICFlowMeter/CICFlowMeter_Training_Balanced.csv"
-TEST_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_Balanced_CSV_Files/CICFlowMeter/CICFlowMeter_Testing_Balanced.csv"
+# TRAIN_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_Balanced_CSV_Files/CICFlowMeter/CICFlowMeter_Training_Balanced.csv"
+# TEST_DATA_PATH = "../../DNP3_Intrusion_Detection_Dataset_Final/Training_Testing_Balanced_CSV_Files/CICFlowMeter/CICFlowMeter_Testing_Balanced.csv"
+
+TRAIN_DATA_PATH = "../../cicddos2019/01-12/DrDoS_LDAP.csv"
+TEST_DATA_PATH = "../../cicddos2019/01-12/DrDoS_LDAP.csv"
+
 
 TRAIN_DATA_PATH = Path(__file__).resolve().parent.joinpath(TRAIN_DATA_PATH)
 TEST_DATA_PATH = Path(__file__).resolve().parent.joinpath(TEST_DATA_PATH)
 
-CATEGORICAL_FEATURES = ["Dst Port", "Protocol"]
+CATEGORICAL_FEATURES = ["Destination Port", "Protocol"]
 
 
 def _read_data(binarize=False, balance=False):
@@ -29,6 +34,8 @@ def _read_data(binarize=False, balance=False):
     test_data = pd.read_csv(TEST_DATA_PATH).replace([np.inf, -np.inf], np.nan).dropna(how="any").dropna(how="all", axis=1)
 
     train_data = train_data.drop_duplicates()
+
+    print(train_data.columns)
 
     # unique
     targets = ""
@@ -54,14 +61,7 @@ def _read_data(binarize=False, balance=False):
     train_data = conbine_data.iloc[:len(train_data) - 1]
     test_data = conbine_data.iloc[len(train_data):]
 
-    # train_data_ohe = ohe.fit_transform(train_data[CATEGORICAL_FEATURES])
-    # train_data_ohe = pd.DataFrame(train_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
-    # train_data = pd.concat([train_data.drop(columns=CATEGORICAL_FEATURES), train_data_ohe], axis=1)
     train_smotenc_columns = ohe.get_feature_names_out(CATEGORICAL_FEATURES).tolist()
-
-    # test_data_ohe = ohe.fit_transform(test_data[CATEGORICAL_FEATURES])
-    # test_data_ohe = pd.DataFrame(test_data_ohe, columns=ohe.get_feature_names_out(CATEGORICAL_FEATURES))
-    # test_data = pd.concat([test_data.drop(columns=CATEGORICAL_FEATURES), test_data_ohe], axis=1)
 
     for label in CONST.normalization_features:
         train_data.loc[:, label] = min_max_p(train_data[label]).astype(train_data[label].dtype)

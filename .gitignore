@@ -163,6 +163,7 @@ cython_debug/
 #.idea/
 
 DNP3_Intrusion_Detection_Dataset_Final
+cicddos2019
 *pycharm-support-libs*
 .idea/*
 csv_captures*
